@@ -1,0 +1,69 @@
+
+name: CI/CD Portfolio
+on:
+  workflow_dispatch:        # déclenché depuis Backstage
+    inputs:
+      version:
+        description: "Version de l'image (ex: v1, v2)"
+        required: false
+  push:
+    branches: [main]        # utile pour l'étape 7
+
+env:
+  IMAGE_NAME: ${{ secrets.DOCKERHUB_USERNAME }}/portfolio-nextjs
+
+jobs:
+  build-and-publish:
+    runs-on: self-hosted
+    outputs:
+      tag: ${{ steps.ver.outputs.tag }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Calculer la version
+        id: ver
+        run: |
+          if [ -n "${{ github.event.inputs.version }}" ]; then
+            TAG="${{ github.event.inputs.version }}"
+          else
+            TAG="v${{ github.run_number }}"
+          fi
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - run: npm install && npm run build
+
+      - uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build & Push
+        run: |
+          docker build -t $IMAGE_NAME:${{ steps.ver.outputs.tag }} -t $IMAGE_NAME:latest .
+          docker push $IMAGE_NAME:${{ steps.ver.outputs.tag }}
+          docker push $IMAGE_NAME:latest
+
+  deploy-local:
+    needs: build-and-publish
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v4
+      - name: Déployer avec Docker Compose
+        env:
+          IMAGE_TAG: ${{ needs.build-and-publish.outputs.tag }}
+        run: |
+          docker compose pull
+          docker compose up -d --remove-orphans
+
+      - name: Vérification de santé
+        run: |
+          for i in $(seq 1 15); do
+            if curl -sf http://localhost:3002 > /dev/null; then
+              echo "Application disponible : http://localhost:3002"
+              exit 0
+            fi
+            sleep 3
+          done
+          echo "Echec du health check"; docker compose logs; exit 1

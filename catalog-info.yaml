@@ -1,0 +1,26 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: portfolio-nextjs
+  description: Portfolio de arij belaid
+  annotations:
+    github.com/project-slug: arijbelaid/backstage-application
+    backstage.io/source-location: url:https://github.com/arijbelaid/backstage-application
+  tags:
+    - nextjs
+    - portfolio
+    - docker
+  links:
+    - url: http://localhost:3002
+      title: Portfolio (local)
+      icon: web
+    - url: https://hub.docker.com/r/arijbelaid/portfolio-nextjs
+      title: Image Docker Hub
+      icon: dashboard
+    - url: https://github.com/arijbelaid/backstage-application/actions
+      title: GitHub Actions
+      icon: github
+spec:
+  type: website
+  lifecycle: production
+  owner: group:default/guests
