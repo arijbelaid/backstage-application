@@ -71,16 +71,20 @@ jobs:
 
       - name: Vérification de santé
         run: |
+          $ok = $false
           for ($i = 0; $i -lt 15; $i++) {
             try {
-              $r = Invoke-WebRequest -Uri "http://localhost:3005" -UseBasicParsing -TimeoutSec 5
-              if ($r.StatusCode -eq 200) {
-                Write-Host "Application disponible : http://localhost:3005"
-                exit 0
-              }
-            } catch { }
+              $r = Invoke-WebRequest -Uri "http://127.0.0.1:3005" -UseBasicParsing -TimeoutSec 5
+              if ($r.StatusCode -eq 200) { $ok = $true; break }
+            } catch {
+              Write-Host "Tentative $($i + 1) : pas encore prêt"
+            }
             Start-Sleep -Seconds 3
           }
-          Write-Host "Echec du health check"
-          docker compose logs
-          exit 1
+          if ($ok) {
+            Write-Host "Application disponible : http://localhost:3005"
+          } else {
+            Write-Host "Echec du health check"
+            docker compose logs
+            exit 1
+          }
