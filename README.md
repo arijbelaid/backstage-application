@@ -9,5 +9,5 @@ Portfolio de arij belaid (DevOps Engineer), généré avec Backstage.
 ## Docker
     docker compose up -d
 
-Application : http://localhost:3000
+Application : http://localhost:3005
 Image : https://hub.docker.com/r/arijbelaid/portfolio-nextjs
