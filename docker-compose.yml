@@ -3,7 +3,7 @@ services:
     image: arijbelaid/portfolio-nextjs:${IMAGE_TAG:-latest}
     container_name: portfolio
     ports:
-      - "3002:3000"
+      - "3005:3000"
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://127.0.0.1:3000"]
