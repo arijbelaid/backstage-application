@@ -11,7 +11,7 @@ metadata:
     - portfolio
     - docker
   links:
-    - url: http://localhost:3002
+    - url: http://localhost:3005
       title: Portfolio (local)
       icon: web
     - url: https://hub.docker.com/r/arijbelaid/portfolio-nextjs
